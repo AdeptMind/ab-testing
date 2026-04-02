@@ -1,8 +1,5 @@
 import { sendGa4Segment } from "./ga-utils";
 import { getLocalJson, setLocalJson } from "./local-storage";
-import type { TrackEvent } from "./types";
-
-export type { TrackEvent };
 
 export const parseEnvPct = (envVar: string | undefined): number => {
   const parsed = Number(envVar);
@@ -14,29 +11,6 @@ export const parseEnvPct = (envVar: string | undefined): number => {
 
 export const drawFromUniform = (pctTrue: number): boolean =>
   Math.random() < pctTrue / 100;
-
-export const trackExperiment = (
-  gaMeasurementId: string,
-  experimentName: string,
-  variant: string,
-  trackEvent: TrackEvent,
-) => {
-  sendGa4Segment(
-    {
-      gaMeasurementId,
-      experimentName,
-      variant,
-    },
-    trackEvent,
-  );
-
-  trackEvent({
-    event: "session:add_segment",
-    data: {
-      segment: `ab:${experimentName}:${variant}`,
-    },
-  });
-};
 
 /**
  * Returns the bucketed boolean for an experiment, persisting it to localStorage
@@ -62,26 +36,23 @@ export const getBucketedValue = (
 };
 
 /**
- * Buckets the user and immediately tracks the result.
- * Combines getBucketedValue + trackExperiment for the common case.
- * The experimentName is used as both the localStorage key and the GA tracking name.
+ * Buckets the user and immediately tracks the result via GA4.
+ * Combines getBucketedValue + sendGa4Segment for the common case.
  *
  * @param storageKey
  * @param experimentName
  * @param pctTrue
  * @param gaMeasurementId
- * @param trackEvent
- * @param getVariant
+ * @param getVariant - maps the boolean bucket result to a variant string (e.g. "control" | "variant")
  */
 export const getBucketedValueAndTrack = (
   storageKey: string,
   experimentName: string,
   pctTrue: number,
   gaMeasurementId: string,
-  trackEvent: TrackEvent,
   getVariant: (result: boolean) => string,
 ): boolean => {
   const result = getBucketedValue(storageKey, experimentName, pctTrue);
-  trackExperiment(gaMeasurementId, experimentName, getVariant(result), trackEvent);
+  sendGa4Segment({ gaMeasurementId, experimentName, variant: getVariant(result) });
   return result;
 };

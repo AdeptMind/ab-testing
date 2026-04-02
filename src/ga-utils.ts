@@ -1,5 +1,4 @@
 import { pollUntil } from "./interval-immediate";
-import type { TrackEvent } from "./types";
 
 /**
  * Format properties for the Adeptmind AB exposure event.
@@ -15,28 +14,15 @@ export const formatProperties = (properties: Record<string, string>): string =>
     .map(([key, value]) => `${key}:${value}`)
     .join(";");
 
-export const withGtag = (fn: () => void, trackEvent?: TrackEvent) => {
-  pollUntil(
-    () => !!window.gtag,
-    fn,
-    200,
-    80,
-    () =>
-      trackEvent?.({
-        event: "session:add_segment",
-        data: { segment: "error:gtag_not_found" },
-      }),
-  );
+export const withGtag = (fn: () => void, onFailure?: () => void) => {
+  pollUntil(() => !!window.gtag, fn, 200, 80, onFailure);
 };
 
-export const sendGa4Segment = (
-  params: {
-    gaMeasurementId: string;
-    experimentName: string;
-    variant: string;
-  },
-  trackEvent?: TrackEvent,
-) => {
+export const sendGa4Segment = (params: {
+  gaMeasurementId: string;
+  experimentName: string;
+  variant: string;
+}) => {
   withGtag(() => {
     window.gtag?.("event", "adeptmind_ab_exposure", {
       send_to: params.gaMeasurementId,
@@ -44,5 +30,5 @@ export const sendGa4Segment = (
         [params.experimentName]: params.variant,
       }),
     });
-  }, trackEvent);
+  });
 };

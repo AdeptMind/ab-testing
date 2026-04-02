@@ -1,4 +1,3 @@
-import { sendGa4Segment } from "./ga-utils";
 import { getLocalJson, setLocalJson } from "./local-storage";
 
 export const parseEnvPct = (envVar: string | undefined): number => {
@@ -32,27 +31,5 @@ export const getBucketedValue = (
   if (experimentName in stored) return stored[experimentName];
   const result = drawFromUniform(pctTrue);
   setLocalJson(storageKey, { ...stored, [experimentName]: result });
-  return result;
-};
-
-/**
- * Buckets the user and immediately tracks the result via GA4.
- * Combines getBucketedValue + sendGa4Segment for the common case.
- *
- * @param storageKey
- * @param experimentName
- * @param pctTrue
- * @param gaMeasurementId
- * @param getVariant - maps the boolean bucket result to a variant string (e.g. "control" | "variant")
- */
-export const getBucketedValueAndTrack = (
-  storageKey: string,
-  experimentName: string,
-  pctTrue: number,
-  gaMeasurementId: string,
-  getVariant: (result: boolean) => string,
-): boolean => {
-  const result = getBucketedValue(storageKey, experimentName, pctTrue);
-  sendGa4Segment({ gaMeasurementId, experimentName, variant: getVariant(result) });
   return result;
 };

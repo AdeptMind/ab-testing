@@ -2,25 +2,44 @@
   "name": "@adeptmind/ab-testing",
   "version": "1.0.0",
   "description": "A/B experiment bucketing and tracking utilities",
+  "license": "MIT",
+  "author": "AdeptMind",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AdeptMind/ab-testing.git"
+  },
+  "keywords": [
+    "ab-testing",
+    "experiments",
+    "bucketing",
+    "localStorage",
+    "adobe-target"
+  ],
+  "engines": {
+    "node": ">=16"
+  },
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/index.js"
     }
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsup src/index.ts --format cjs,esm --dts",
     "test": "vitest run",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "prepublishOnly": "npm run lint && npm test && npm run build"
   },
   "files": [
     "dist"
   ],
   "devDependencies": {
+    "jsdom": "^29.0.2",
+    "tsup": "^8.5.1",
     "typescript": "^5.0.0",
     "vitest": "^2.0.0"
   }

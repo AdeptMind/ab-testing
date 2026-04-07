@@ -14,9 +14,9 @@ npm install @adeptmind/ab-testing
 import { getBucketedValue, parseEnvPct } from "@adeptmind/ab-testing";
 
 const pct = parseEnvPct(process.env.REACT_APP_HPDP_PCT);
-const useHpdp = getBucketedValue("ab-tests", "am-hpdp", pct);
+const overlayHPDP = getBucketedValue("ab-tests", "am-hpdp", pct);
 
-if (useHpdp) {
+if (overlayHPDP) {
   overlayHpdp(); // overlay the host PDP with the HPDP experience
 }
 ```
@@ -104,17 +104,17 @@ This library is designed for a two-tier experimentation pattern:
 **Tier 2 — Host PDP's Alloy script (Adobe Target)** runs post-hydration and reads `window.__adeptmind_ab__["am-hpdp"]`:
 
 - `true` — use default splits for other Adobe Target experiments (HPDP overlays the page, so these splits don't affect the HPDP experience)
-- `false` — proceed with regular experiment splits on the native PDP
+- `false` — proceed with regular experiment splits on the native PDP (can proceed as if HPDP experiment does not exist)
 
 ```ts
 // Tier 1 — AMT script at page load
 import { getBucketedValue, parseEnvPct } from "@adeptmind/ab-testing";
 
 const pct = parseEnvPct(process.env.REACT_APP_HPDP_PCT);
-const useHpdp = getBucketedValue("ab-tests", "am-hpdp", pct);
+const overlayHPDP = getBucketedValue("ab-tests", "am-hpdp", pct);
 // window.__adeptmind_ab__ === { "am-hpdp": true }
 
-if (useHpdp) {
+if (overlayHPDP) {
   overlayHpdp();
 }
 

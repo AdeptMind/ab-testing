@@ -74,8 +74,8 @@ export const drawFromUniform = (pctTrue: number): boolean =>
  *
  * @example
  * ```ts
- * const useHpdp = getBucketedValue("ab-tests", "am-hpdp", 50);
- * if (useHpdp) {
+ * const overlayHPDP = getBucketedValue("ab-tests", "am-hpdp", 50);
+ * if (overlayHPDP) {
  *   overlayHpdp();
  * }
  * ```

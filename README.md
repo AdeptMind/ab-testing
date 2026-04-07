@@ -17,9 +17,9 @@ npm install @adeptmind/ab-testing
 import { getBucketedValue, parseEnvPct } from "@adeptmind/ab-testing";
 
 const pct = parseEnvPct(process.env.REACT_APP_HPDP_PCT);
-const overlayHPDP = getBucketedValue("ab-tests", "am_hpdp", pct);
+const shouldOverlayHPDP = getBucketedValue("ab-tests", "am_hpdp", pct);
 
-if (overlayHPDP) {
+if (shouldOverlayHPDP) {
   overlayHpdp(); // overlay the host PDP with the HPDP experience
 }
 ```

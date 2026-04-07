@@ -76,26 +76,9 @@ Reads and parses a JSON value from localStorage. Returns `null` if the key is mi
 
 Serializes a value as JSON and writes it to localStorage.
 
-## How Bucketing Works
-
-```
-First visit:
-  1. Read localStorage["ab-tests"]        → null (empty)
-  2. Draw random number, compare to pctTrue → true
-  3. Write localStorage["ab-tests"]        → { "am_hpdp": true }
-  4. Set window.adeptmind_ab_testing["am_hpdp"] = true
-  5. Return true
-
-Second visit:
-  1. Read localStorage["ab-tests"]         → { "am_hpdp": true }
-  2. Key "am_hpdp" exists                  → skip random draw
-  3. Set window.adeptmind_ab_testing["am_hpdp"] = true
-  4. Return true
-```
-
-All experiments under the same `storageKey` are stored in a single JSON object. Adding a new experiment never overwrites existing assignments.
-
 ## Two-Tier Experimentation
+
+This is how experimentation works when integrating with the AdeptMind HPDP experience.
 
 This library is designed for a two-tier experimentation pattern:
 
@@ -111,10 +94,10 @@ This library is designed for a two-tier experimentation pattern:
 import { getBucketedValue, parseEnvPct } from "@adeptmind/ab-testing";
 
 const pct = parseEnvPct(process.env.REACT_APP_HPDP_PCT);
-const overlayHPDP = getBucketedValue("ab-tests", "am_hpdp", pct);
+const shouldOverlayHPDP = getBucketedValue("ab-tests", "am_hpdp", pct);
 // window.adeptmind_ab_testing === { "am_hpdp": true }
 
-if (overlayHPDP) {
+if (shouldOverlayHPDP) {
   overlayHpdp();
 }
 
@@ -122,6 +105,27 @@ if (overlayHPDP) {
 //   window.adeptmind_ab_testing["am_hpdp"] === true  → lock target splits to a consistent default set. This ensures that HPDP does not affect other ongoing experiment data
 //   window.adeptmind_ab_testing["am_hpdp"] === false → regular experiment splitting logic as if HPDP does not exist
 ```
+
+### How Bucketing Works
+
+```
+First visit:
+  1. Read localStorage["ab-tests"]        → null (empty)
+  2. Draw random number, compare to pctTrue → true
+  3. Write localStorage["ab-tests"]        → { "am_hpdp": true }
+  4. Set window.adeptmind_ab_testing["am_hpdp"] = true
+  5. Return true → Tier 1 activates HPDP overlay
+  6. Tier 2 (Adobe Target) reads window.adeptmind_ab_testing["am_hpdp"]
+     → true → lock target splits to default set
+
+Second visit:
+  1. Read localStorage["ab-tests"]         → { "am_hpdp": true }
+  2. Key "am_hpdp" exists                  → skip random draw
+  3. Set window.adeptmind_ab_testing["am_hpdp"] = true
+  4. Return true → same experience as first visit
+```
+
+All experiments under the same `storageKey` are stored in a single JSON object. Adding a new experiment never overwrites existing assignments.
 
 ## FAQs
 
@@ -169,19 +173,6 @@ Adobe Target (Tier 2) runs after page hydration via the host PDP's Alloy script.
 ### Does this work with SSR?
 
 No — this library depends on `localStorage`, which is only available in the browser. For server-side rendering, bucket on the server using a different mechanism (e.g., cookie-based or user-ID-based hashing) and pass the assignment to the client.
-
-### What happens if localStorage is unavailable?
-
-The library does not catch `localStorage` errors internally. If `localStorage` is unavailable (e.g., private browsing in some browsers, or storage quota exceeded), the call will throw. Wrap in a try/catch if you need to handle this:
-
-```ts
-let showFeature = false;
-try {
-  showFeature = getBucketedValue("ab-tests", "my-feature", 50);
-} catch {
-  // localStorage unavailable — fall back to control
-}
-```
 
 ### How do I configure the percentage from an environment variable?
 

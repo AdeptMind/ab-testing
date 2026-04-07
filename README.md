@@ -102,19 +102,22 @@ if (shouldOverlayHPDP) {
 }
 
 // Tier 2 — Adobe Target audience rule (post-hydration):
-//   window.adeptmind_ab_testing["am_hpdp"] === true  → lock target splits to a consistent default set. This ensures that HPDP does not affect other ongoing experiment data
-//   window.adeptmind_ab_testing["am_hpdp"] === false → regular experiment splitting logic as if HPDP does not exist
+// if (window.adeptmind_ab_testing["am_hpdp"] === true){
+//   → lock target splits to a consistent default set. This ensures that HPDP does not affect other ongoing experiment data
+// } else { 
+//   → regular experiment splitting logic as if HPDP does not exist
+// }
 ```
 
 ### How Bucketing Works
 
 ```
 First visit:
-  1. Read localStorage["ab-tests"]        → null (empty)
+  1. Read localStorage["ab-tests"]          → null (empty)
   2. Draw random number, compare to pctTrue → true
-  3. Write localStorage["ab-tests"]        → { "am_hpdp": true }
+  3. Write localStorage["ab-tests"]         → { "am_hpdp": true }
   4. Set window.adeptmind_ab_testing["am_hpdp"] = true
-  5. Return true → Tier 1 activates HPDP overlay
+  5. Return true                            → Tier 1 activates HPDP overlay
   6. Tier 2 (Adobe Target) reads window.adeptmind_ab_testing["am_hpdp"]
      → true → lock target splits to default set
 

@@ -13,5 +13,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `parseEnvPct` — safe parsing of percentage values from environment variables
 - `drawFromUniform` — single non-sticky random draw
 - `getLocalJson` / `setLocalJson` — typed localStorage helpers
-- Bucket assignments exposed on `window.__adeptmind_ab__` for Adobe Target integration
+- Bucket assignments exposed on `window.adeptmind_ab_testing` for Adobe Target integration
 - Dual CJS/ESM package output

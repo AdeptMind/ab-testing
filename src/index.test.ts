@@ -66,7 +66,7 @@ describe("drawFromUniform", () => {
 describe("getBucketedValue", () => {
   afterEach(() => {
     vi.restoreAllMocks();
-    delete (window as unknown as Record<string, unknown>).__adeptmind_ab__;
+    delete (window as unknown as Record<string, unknown>).adeptmind_ab_testing;
   });
 
   it("assigns a user to a bucket on first visit", () => {
@@ -108,36 +108,36 @@ describe("getBucketedValue", () => {
     expect(storedA).toBe(true);
   });
 
-  it("sets window.__adeptmind_ab__ with the experiment assignment", () => {
+  it("sets window.adeptmind_ab_testing with the experiment assignment", () => {
     vi.spyOn(Math, "random").mockReturnValue(0.3);
 
-    getBucketedValue("ab-tests", "am-hpdp", 50);
+    getBucketedValue("ab-tests", "am_hpdp", 50);
 
-    expect(window.__adeptmind_ab__).toEqual({ "am-hpdp": true });
+    expect(window.adeptmind_ab_testing).toEqual({ am_hpdp: true });
   });
 
-  it("accumulates multiple experiments on window.__adeptmind_ab__", () => {
+  it("accumulates multiple experiments on window.adeptmind_ab_testing", () => {
     vi.spyOn(Math, "random").mockReturnValue(0.3);
     getBucketedValue("ab-tests", "experiment-a", 50);
 
     vi.spyOn(Math, "random").mockReturnValue(0.9);
     getBucketedValue("ab-tests", "experiment-b", 50);
 
-    expect(window.__adeptmind_ab__).toEqual({
+    expect(window.adeptmind_ab_testing).toEqual({
       "experiment-a": true,
       "experiment-b": false,
     });
   });
 
-  it("sets window.__adeptmind_ab__ on subsequent visits (cached path)", () => {
+  it("sets window.adeptmind_ab_testing on subsequent visits (cached path)", () => {
     vi.spyOn(Math, "random").mockReturnValue(0.3);
-    getBucketedValue("ab-tests", "am-hpdp", 50);
+    getBucketedValue("ab-tests", "am_hpdp", 50);
 
-    delete (window as unknown as Record<string, unknown>).__adeptmind_ab__;
+    delete (window as unknown as Record<string, unknown>).adeptmind_ab_testing;
 
-    const result = getBucketedValue("ab-tests", "am-hpdp", 50);
+    const result = getBucketedValue("ab-tests", "am_hpdp", 50);
 
     expect(result).toBe(true);
-    expect(window.__adeptmind_ab__).toEqual({ "am-hpdp": true });
+    expect(window.adeptmind_ab_testing).toEqual({ am_hpdp: true });
   });
 });

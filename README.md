@@ -17,7 +17,7 @@ npm install @adeptmind/ab-testing
 import { getBucketedValue, parseEnvPct } from "@adeptmind/ab-testing";
 
 const pct = parseEnvPct(process.env.REACT_APP_HPDP_PCT);
-const overlayHPDP = getBucketedValue("ab-tests", "am-hpdp", pct);
+const overlayHPDP = getBucketedValue("ab-tests", "am_hpdp", pct);
 
 if (overlayHPDP) {
   overlayHpdp(); // overlay the host PDP with the HPDP experience
@@ -35,7 +35,7 @@ The main function. Assigns a user to an experiment bucket and persists the resul
 | Parameter | Type | Description |
 |---|---|---|
 | `storageKey` | `string` | localStorage key for storing all experiment assignments (e.g., `"ab-tests"`) |
-| `experimentName` | `string` | Unique identifier for the experiment (e.g., `"am-hpdp"`) |
+| `experimentName` | `string` | Unique identifier for the experiment (e.g., `"am_hpdp"`) |
 | `pctTrue` | `number` | Probability (0–100) of assigning `true` on first draw |
 
 **Returns** `true` if the user is in the experiment group, `false` for control.
@@ -85,14 +85,14 @@ Serializes a value as JSON and writes it to localStorage.
 First visit:
   1. Read localStorage["ab-tests"]        → null (empty)
   2. Draw random number, compare to pctTrue → true
-  3. Write localStorage["ab-tests"]        → { "am-hpdp": true }
-  4. Set window.__adeptmind_ab__["am-hpdp"] = true
+  3. Write localStorage["ab-tests"]        → { "am_hpdp": true }
+  4. Set window.adeptmind_ab_testing["am_hpdp"] = true
   5. Return true
 
 Second visit:
-  1. Read localStorage["ab-tests"]         → { "am-hpdp": true }
-  2. Key "am-hpdp" exists                  → skip random draw
-  3. Set window.__adeptmind_ab__["am-hpdp"] = true
+  1. Read localStorage["ab-tests"]         → { "am_hpdp": true }
+  2. Key "am_hpdp" exists                  → skip random draw
+  3. Set window.adeptmind_ab_testing["am_hpdp"] = true
   4. Return true
 ```
 
@@ -102,9 +102,9 @@ All experiments under the same `storageKey` are stored in a single JSON object. 
 
 This library is designed for a two-tier experimentation pattern:
 
-**Tier 1 — AMT script** buckets `am-hpdp` at page load. If `true`, HPDP overlay is activated. The assignment is written to `window.__adeptmind_ab__` so Tier 2 can read it.
+**Tier 1 — AMT script** buckets `am_hpdp` at page load. If `true`, HPDP overlay is activated. The assignment is written to `window.adeptmind_ab_testing` so Tier 2 can read it.
 
-**Tier 2 — Host PDP's Alloy script (Adobe Target)** runs post-hydration and reads `window.__adeptmind_ab__["am-hpdp"]`:
+**Tier 2 — Host PDP's Alloy script (Adobe Target)** runs post-hydration and reads `window.adeptmind_ab_testing["am_hpdp"]`:
 
 - `true` — use default splits for other Adobe Target experiments (HPDP overlays the page, so these splits don't affect the HPDP experience)
 - `false` — proceed with regular experiment splits on the native PDP (can proceed as if HPDP experiment does not exist)
@@ -114,16 +114,16 @@ This library is designed for a two-tier experimentation pattern:
 import { getBucketedValue, parseEnvPct } from "@adeptmind/ab-testing";
 
 const pct = parseEnvPct(process.env.REACT_APP_HPDP_PCT);
-const overlayHPDP = getBucketedValue("ab-tests", "am-hpdp", pct);
-// window.__adeptmind_ab__ === { "am-hpdp": true }
+const overlayHPDP = getBucketedValue("ab-tests", "am_hpdp", pct);
+// window.adeptmind_ab_testing === { "am_hpdp": true }
 
 if (overlayHPDP) {
   overlayHpdp();
 }
 
 // Tier 2 — Adobe Target audience rule (post-hydration):
-//   window.__adeptmind_ab__["am-hpdp"] === true  → lock target splits to a consistent default set. This ensures that HPDP does not affect other ongoing experiment data
-//   window.__adeptmind_ab__["am-hpdp"] === false → regular experiment splitting logic as if HPDP does not exist
+//   window.adeptmind_ab_testing["am_hpdp"] === true  → lock target splits to a consistent default set. This ensures that HPDP does not affect other ongoing experiment data
+//   window.adeptmind_ab_testing["am_hpdp"] === false → regular experiment splitting logic as if HPDP does not exist
 ```
 
 ## FAQs
@@ -167,7 +167,7 @@ localStorage.setItem("ab-tests", JSON.stringify(stored));
 
 ### How does this work with Adobe Target?
 
-Adobe Target (Tier 2) runs after page hydration via the host PDP's Alloy script. By that point, `getBucketedValue` has already written bucket assignments to `window.__adeptmind_ab__`. Adobe Target reads `window.__adeptmind_ab__["am-hpdp"]` in its audience rules: if `true`, it applies default splits for its own experiments (since HPDP overlays the page anyway); if `false`, it proceeds with regular experiment splits on the native PDP.
+Adobe Target (Tier 2) runs after page hydration via the host PDP's Alloy script. By that point, `getBucketedValue` has already written bucket assignments to `window.adeptmind_ab_testing`. Adobe Target reads `window.adeptmind_ab_testing["am_hpdp"]` in its audience rules: if `true`, it applies default splits for its own experiments (since HPDP overlays the page anyway); if `false`, it proceeds with regular experiment splits on the native PDP.
 
 ### Does this work with SSR?
 

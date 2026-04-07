@@ -69,12 +69,12 @@ export const drawFromUniform = (pctTrue: number): boolean =>
  * @returns `true` if the user is in the experiment group; `false` for control.
  *
  * @remarks
- * Also sets `window.__adeptmind_ab__[experimentName]` so downstream systems
+ * Also sets `window.adeptmind_ab_testing[experimentName]` so downstream systems
  * (e.g., Adobe Target) can read bucket assignments post-hydration.
  *
  * @example
  * ```ts
- * const overlayHPDP = getBucketedValue("ab-tests", "am-hpdp", 50);
+ * const overlayHPDP = getBucketedValue("ab-tests", "am_hpdp", 50);
  * if (overlayHPDP) {
  *   overlayHpdp();
  * }
@@ -95,8 +95,8 @@ export const getBucketedValue = (
     setLocalJson(storageKey, { ...stored, [experimentName]: result });
   }
 
-  window.__adeptmind_ab__ ??= {};
-  window.__adeptmind_ab__[experimentName] = result;
+  window.adeptmind_ab_testing ??= {};
+  window.adeptmind_ab_testing[experimentName] = result;
 
   return result;
 };

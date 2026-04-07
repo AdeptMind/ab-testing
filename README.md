@@ -102,11 +102,11 @@ if (shouldOverlayHPDP) {
 }
 
 // Tier 2 — Adobe Target audience rule (post-hydration):
-// if (window.adeptmind_ab_testing["am_hpdp"] === true){
+if (window.adeptmind_ab_testing["am_hpdp"] === true){
 //   → lock target splits to a consistent default set. This ensures that HPDP does not affect other ongoing experiment data
-// } else { 
+} else { 
 //   → regular experiment splitting logic as if HPDP does not exist
-// }
+}
 ```
 
 ### How Bucketing Works

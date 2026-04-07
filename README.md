@@ -1,8 +1,5 @@
 # @adeptmind/ab-testing
 
-[![npm version](https://img.shields.io/npm/v/@adeptmind/ab-testing.svg)](https://www.npmjs.com/package/@adeptmind/ab-testing)
-[![license](https://img.shields.io/npm/l/@adeptmind/ab-testing.svg)](./LICENSE)
-
 Lightweight A/B experiment bucketing with localStorage persistence. Assign users to experiment groups with a single function call — assignments are sticky, so returning users always see the same variant.
 
 ## Install

@@ -114,10 +114,10 @@ This library is designed for a two-tier experimentation pattern:
 import { getBucketedValue, parseEnvPct } from "@adeptmind/ab-testing";
 
 const pct = parseEnvPct(process.env.REACT_APP_HPDP_PCT);
-const overlayHPDP = getBucketedValue("ab-tests", "am_hpdp", pct);
+const shouldOverlayHPDP = getBucketedValue("ab-tests", "am_hpdp", pct);
 // window.adeptmind_ab_testing === { "am_hpdp": true }
 
-if (overlayHPDP) {
+if (shouldOverlayHPDP) {
   overlayHpdp();
 }
 
@@ -172,19 +172,6 @@ Adobe Target (Tier 2) runs after page hydration via the host PDP's Alloy script.
 ### Does this work with SSR?
 
 No — this library depends on `localStorage`, which is only available in the browser. For server-side rendering, bucket on the server using a different mechanism (e.g., cookie-based or user-ID-based hashing) and pass the assignment to the client.
-
-### What happens if localStorage is unavailable?
-
-The library does not catch `localStorage` errors internally. If `localStorage` is unavailable (e.g., private browsing in some browsers, or storage quota exceeded), the call will throw. Wrap in a try/catch if you need to handle this:
-
-```ts
-let showFeature = false;
-try {
-  showFeature = getBucketedValue("ab-tests", "my-feature", 50);
-} catch {
-  // localStorage unavailable — fall back to control
-}
-```
 
 ### How do I configure the percentage from an environment variable?
 

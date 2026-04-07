@@ -1,4 +1,5 @@
 import { getLocalJson, setLocalJson } from "./local-storage";
+import "./types";
 
 /**
  * Parses an environment variable string as a percentage (0–100).
@@ -67,11 +68,15 @@ export const drawFromUniform = (pctTrue: number): boolean =>
  * @param pctTrue - Probability (0–100) of assigning `true` on first draw.
  * @returns `true` if the user is in the experiment group; `false` for control.
  *
+ * @remarks
+ * Also sets `window.__adeptmind_ab__[experimentName]` so downstream systems
+ * (e.g., Adobe Target) can read bucket assignments post-hydration.
+ *
  * @example
  * ```ts
- * const showRedesign = getBucketedValue("ab-tests", "homepage-redesign", 50);
- * if (showRedesign) {
- *   renderNewHomepage();
+ * const useHpdp = getBucketedValue("ab-tests", "am-hpdp", 50);
+ * if (useHpdp) {
+ *   overlayHpdp();
  * }
  * ```
  */
@@ -81,12 +86,17 @@ export const getBucketedValue = (
   pctTrue: number,
 ): boolean => {
   const stored = getLocalJson<Record<string, boolean>>(storageKey) ?? {};
+  const result =
+    experimentName in stored
+      ? stored[experimentName]
+      : drawFromUniform(pctTrue);
 
-  if (experimentName in stored) return stored[experimentName];
+  if (!(experimentName in stored)) {
+    setLocalJson(storageKey, { ...stored, [experimentName]: result });
+  }
 
-  const result = drawFromUniform(pctTrue);
-
-  setLocalJson(storageKey, { ...stored, [experimentName]: result });
+  window.__adeptmind_ab__ ??= {};
+  window.__adeptmind_ab__[experimentName] = result;
 
   return result;
 };

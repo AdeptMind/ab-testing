@@ -66,6 +66,7 @@ describe("drawFromUniform", () => {
 describe("getBucketedValue", () => {
   afterEach(() => {
     vi.restoreAllMocks();
+    delete (window as unknown as Record<string, unknown>).__adeptmind_ab__;
   });
 
   it("assigns a user to a bucket on first visit", () => {
@@ -105,5 +106,38 @@ describe("getBucketedValue", () => {
 
     const storedA = getBucketedValue("ab-tests", "experiment-a", 50);
     expect(storedA).toBe(true);
+  });
+
+  it("sets window.__adeptmind_ab__ with the experiment assignment", () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.3);
+
+    getBucketedValue("ab-tests", "am-hpdp", 50);
+
+    expect(window.__adeptmind_ab__).toEqual({ "am-hpdp": true });
+  });
+
+  it("accumulates multiple experiments on window.__adeptmind_ab__", () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.3);
+    getBucketedValue("ab-tests", "experiment-a", 50);
+
+    vi.spyOn(Math, "random").mockReturnValue(0.9);
+    getBucketedValue("ab-tests", "experiment-b", 50);
+
+    expect(window.__adeptmind_ab__).toEqual({
+      "experiment-a": true,
+      "experiment-b": false,
+    });
+  });
+
+  it("sets window.__adeptmind_ab__ on subsequent visits (cached path)", () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.3);
+    getBucketedValue("ab-tests", "am-hpdp", 50);
+
+    delete (window as unknown as Record<string, unknown>).__adeptmind_ab__;
+
+    const result = getBucketedValue("ab-tests", "am-hpdp", 50);
+
+    expect(result).toBe(true);
+    expect(window.__adeptmind_ab__).toEqual({ "am-hpdp": true });
   });
 });

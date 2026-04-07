@@ -1,5 +1,8 @@
 # @adeptmind/ab-testing
 
+[![npm version](https://img.shields.io/npm/v/@adeptmind/ab-testing.svg)](https://www.npmjs.com/package/@adeptmind/ab-testing)
+[![license](https://img.shields.io/npm/l/@adeptmind/ab-testing.svg)](./LICENSE)
+
 Lightweight A/B experiment bucketing with localStorage persistence. Assign users to experiment groups with a single function call — assignments are sticky, so returning users always see the same variant.
 
 ## Install
@@ -99,7 +102,7 @@ All experiments under the same `storageKey` are stored in a single JSON object. 
 
 This library is designed for a two-tier experimentation pattern:
 
-**Tier 1 — AMT script** buckets `am-hpdp` at page load. If `true`, HPDP overlays the host PDP (only header, footer, and popups remain from the host page). The assignment is written to `window.__adeptmind_ab__` so Tier 2 can read it.
+**Tier 1 — AMT script** buckets `am-hpdp` at page load. If `true`, HPDP overlay is activated. The assignment is written to `window.__adeptmind_ab__` so Tier 2 can read it.
 
 **Tier 2 — Host PDP's Alloy script (Adobe Target)** runs post-hydration and reads `window.__adeptmind_ab__["am-hpdp"]`:
 
